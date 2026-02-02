@@ -1,0 +1,29 @@
+# Dockerfile security best practices
+
+FROM python:3.10-slim
+
+# Usuário não-root
+RUN groupadd -r aurora && useradd -r -g aurora aurora
+
+# Atualizações de segurança
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiar requirements primeiro (cache de camadas)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código como usuário não-root
+COPY --chown=aurora:aurora . .
+
+USER aurora
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
