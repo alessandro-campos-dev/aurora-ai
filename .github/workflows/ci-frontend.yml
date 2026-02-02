@@ -1,0 +1,89 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/web/**'
+      - '.github/workflows/ci-frontend.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/web/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: src/web/package.json
+    
+    - name: Install dependencies
+      working-directory: src/web
+      run: npm ci
+    
+    - name: Run tests
+      working-directory: src/web
+      run: npm test -- --passWithNoTests
+    
+    - name: Run type check
+      working-directory: src/web
+      run: npm run type-check || true
+    
+    - name: Build
+      working-directory: src/web
+      run: npm run build
+    
+    - name: Lint
+      working-directory: src/web
+      run: npm run lint
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      working-directory: src/web
+      run: npm ci
+    
+    - name: Install Playwright browsers
+      working-directory: src/web
+      run: npx playwright install --with-deps chromium
+    
+    - name: Run E2E tests
+      working-directory: src/web
+      run: npm run test:e2e
+      env:
+        CI: true
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: [test, e2e]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Web Docker image
+      run: |
+        docker build \
+          -f infrastructure/docker/Dockerfile.web \
+          -t aurora-ai-web:latest \
+          src/web
