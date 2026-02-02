@@ -1,4 +1,4 @@
-# Estrutura de preços por tamanho dos Municípios:
+#  Estrutura de preços por tamanho dos Municípios:
 
 - Município pequeno (<50k hab): R$ 15.000/ano
 
