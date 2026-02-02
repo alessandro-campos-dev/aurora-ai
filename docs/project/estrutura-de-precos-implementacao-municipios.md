@@ -1,0 +1,11 @@
+#Estrutura de preços por tamanho dos Municípios:
+
+- Município pequeno (<50k hab): R$ 15.000/ano
+
+- Município médio (50-200k): R$ 45.000/ano
+
+- Município grande (>200k): R$ 120.000/ano + implementação
+
+- Hospital público: R$ 80.000-200.000/ano
+
+- Rede estadual: R$ 500.000-2M/ano (concorrência)
