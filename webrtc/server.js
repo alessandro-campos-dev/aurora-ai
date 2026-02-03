@@ -372,4 +372,81 @@ if (server !== wss) {
         if (req.url === '/health') {
             res.writeHead(200);
             res.end(JSON.stringify({
-               
+                status: 'healthy',
+                connections: connections.size,
+                rooms: rooms.size,
+                timestamp: new Date().toISOString()
+            }));
+        } else {
+            res.writeHead(404);
+            res.end();
+        }
+    });
+}
+
+// Inicia servidor
+server.listen(PORT, () => {
+    console.log(`
+    🚀 Aurora AI WebRTC Server
+    📍 Porta: ${PORT}
+    🔗 WebSocket: ws${server.key ? 's' : ''}://localhost:${PORT}
+    ⏰ Iniciado em: ${new Date().toISOString()}
+    
+    📊 Estatísticas:
+    • Conexões ativas: 0
+    • Salas ativas: 0
+    
+    📝 Endpoints:
+    • /health - Health check HTTP
+    • WebSocket - Signaling server
+    
+    ⚠️  Modo: ${server.key ? 'PRODUÇÃO (HTTPS)' : 'DESENVOLVIMENTO (HTTP)'}
+    `);
+});
+
+// Cleanup periódico (remove conexões inativas)
+setInterval(() => {
+    const now = Date.now();
+    const timeout = 30000; // 30 segundos
+    
+    connections.forEach((connection, connectionId) => {
+        if (connection.lastHeartbeat && (now - connection.lastHeartbeat > timeout)) {
+            console.log(`⏰ Conexão ${connectionId} inativa, removendo...`);
+            if (connection.roomId) {
+                leaveRoom(connectionId, connection.roomId);
+            }
+            connections.delete(connectionId);
+            
+            try {
+                connection.ws.close();
+            } catch (error) {
+                // Ignora erros ao fechar
+            }
+        }
+    });
+}, 10000); // Verifica a cada 10 segundos
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+    console.log('\n👋 Encerrando servidor...');
+    
+    // Fecha todas as conexões
+    connections.forEach((connection) => {
+        try {
+            connection.ws.close(1000, 'Server shutdown');
+        } catch (error) {
+            // Ignora erros
+        }
+    });
+    
+    server.close(() => {
+        console.log('✅ Servidor encerrado');
+        process.exit(0);
+    });
+});
+
+module.exports = {
+    wss,
+    rooms,
+    connections
+};
