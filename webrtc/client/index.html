@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora AI - Telemedicina</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-stethoscope"></i>
+                <h1>Aurora AI <span class="subtitle">Telemedicina</span></h1>
+            </div>
+            <div class="connection-status">
+                <span id="status-indicator" class="status-offline"></span>
+                <span id="status-text">Desconectado</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel: Video and Controls -->
+            <div class="video-panel">
+                <div class="video-container">
+                    <!-- Local Video -->
+                    <div class="video-wrapper">
+                        <h3><i class="fas fa-user-md"></i> Sua Câmera</h3>
+                        <video id="localVideo" autoplay muted playsinline></video>
+                        <div class="video-controls">
+                            <button id="toggleVideo" class="btn-control active">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button id="toggleAudio" class="btn-control active">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button id="toggleScreen" class="btn-control">
+                                <i class="fas fa-desktop"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remote Video -->
+                    <div class="video-wrapper">
+                        <h3><i class="fas fa-user-injured"></i> Paciente</h3>
+                        <video id="remoteVideo" autoplay playsinline></video>
+                        <div class="video-info" id="remoteInfo">
+                            Aguardando conexão...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Tools -->
+                <div class="medical-tools">
+                    <h3><i class="fas fa-tools"></i> Ferramentas Médicas</h3>
+                    <div class="tools-grid">
+                        <button class="tool-btn" id="btnMagnify">
+                            <i class="fas fa-search-plus"></i>
+                            <span>Ampliar</span>
+                        </button>
+                        <button class="tool-btn" id="btnFreeze">
+                            <i class="fas fa-pause"></i>
+                            <span>Congelar</span>
+                        </button>
+                        <button class="tool-btn" id="btnMeasure">
+                            <i class="fas fa-ruler"></i>
+                            <span>Medir</span>
+                        </button>
+                        <button class="tool-btn" id="btnAnnotate">
+                            <i class="fas fa-edit"></i>
+                            <span>Anotar</span>
+                        </button>
+                        <button class="tool-btn" id="btnRecord">
+                            <i class="fas fa-record-vinyl"></i>
+                            <span>Gravar</span>
+                        </button>
+                        <button class="tool-btn" id="btnSnapshot">
+                            <i class="fas fa-camera"></i>
+                            <span>Capturar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Chat and Information -->
+            <div class="info-panel">
+                <!-- Session Info -->
+                <div class="session-info">
+                    <h3><i class="fas fa-info-circle"></i> Informações da Sessão</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Sala:</span>
+                            <span id="roomId" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Duração:</span>
+                            <span id="sessionTimer" class="value">00:00:00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Paciente:</span>
+                            <span id="patientName" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">ID:</span>
+                            <span id="patientId" class="value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat -->
+                <div class="chat-container">
+                    <h3><i class="fas fa-comments"></i> Chat</h3>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="system-message">
+                            <i class="fas fa-robot"></i>
+                            Bem-vindo à sessão de telemedicina Aurora AI
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Digite sua mensagem..." autocomplete="off">
+                        <button id="sendMessage">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                    <div class="actions-grid">
+                        <button class="action-btn" id="btnPrescription">
+                            <i class="fas fa-prescription"></i>
+                            <span>Receita</span>
+                        </button>
+                        <button class="action-btn" id="btnReferral">
+                            <i class="fas fa-file-medical"></i>
+                            <span>Encaminhar</span>
+                        </button>
+                        <button class="action-btn" id="btnExam">
+                            <i class="fas fa-file-medical-alt"></i>
+                            <span>Solicitar Exame</span>
+                        </button>
+                        <button class="action-btn" id="btnEndSession">
+                            <i class="fas fa-stop-circle"></i>
+                            <span>Encerrar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Modal -->
+        <div id="connectionModal" class="modal">
+            <div class="modal-content">
+                <h2><i class="fas fa-plug"></i> Conectar à Sessão</h2>
+                <div class="form-group">
+                    <label for="roomInput"><i class="fas fa-door-closed"></i> ID da Sala</label>
+                    <input type="text" id="roomInput" placeholder="Digite o ID da sala">
+                </div>
+                <div class="form-group">
+                    <label for="userType"><i class="fas fa-user-tag"></i> Tipo de Usuário</label>
+                    <select id="userType">
+                        <option value="medico">Médico</option>
+                        <option value="paciente">Paciente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userId"><i class="fas fa-id-card"></i> Seu ID</label>
+                    <input type="text" id="userId" placeholder="Digite seu ID">
+                </div>
+                <div class="modal-actions">
+                    <button id="btnConnect" class="btn-primary">
+                        <i class="fas fa-link"></i> Conectar
+                    </button>
+                    <button id="btnCreateRoom" class="btn-secondary">
+                        <i class="fas fa-plus"></i> Criar Nova Sala
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+    <script src="app.js"></script>
+    <script src="medical-tools.js"></script>
+</body>
+</html>
